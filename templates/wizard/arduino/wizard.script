@@ -355,24 +355,35 @@ function CreateTarget(project, targetName, processor, variant, protocol, baudrat
 //ArduinoIDE/ATtiny84:
 //avrdude -C~/bin/arduino-1.0.1/hardware/tools/avrdude.conf -v -v -v -v -pattiny84 -cusbasp -Pusb -Uflash:w:/tmp/build54.tmp/sketch_jan17a.cpp.hex:i 
 
-
-
-				    if (AvrUpload)
-				    {
-                if (variant.Matches(_T("leonardo"))) { // set leonardo into bootloader mode by lowering the baudrate
-                //  target.AddCommandsAfterBuild(_T("python ~/.codeblocks/start_leonardo_bootmode.py ${UPLOAD_PORT}"));
+            if (AvrUpload) {
+                local needToSwitchBootloader = variant.Matches(_T("leonardo")) || variant.Matches(_T("micro"));
+                if (needToSwitchBootloader) { // set leonardo into bootloader mode by lowering the baudrate
+                    target.AddCommandsAfterBuild(_T("python ~/.codeblocks/start_leonardo_bootmode.py ${UPLOAD_PORT}"));
                 }
                 // for ATtiny chips, we need to erase the flash memory in order to upload; all others can use the -D option - not sure why
                 local cmd = (variant.Matches(_T("tinyX4")) || variant.Matches(_T("tinyX5")))? _T("avrdude ") : _T("avrdude -D ");
-                  
-				        target.AddCommandsAfterBuild(cmd + _T(" -V -C $(ARDUINO_DIR)/hardware/tools/avr/etc/avrdude.conf -p${MCU} -c${PROTOCOL} -P${UPLOAD_PORT} -b${UPLOAD_BAUDRATE} -Uflash:w:${TARGET_OUTPUT_DIR}${TARGET_OUTPUT_BASENAME}.elf.hex:i"));
-                if (variant.Matches(_T("leonardo"))) { // exit leonardo bootloader mode by restoring the serial port baudrate
-                //  target.AddCommandsAfterBuild(_T("python ~/.codeblocks/end_leonardo_bootmode.py ${UPLOAD_PORT} ${UPLOAD_BAUDRATE}"));
-                }
-				    }
+                target.AddCommandsAfterBuild(cmd + _T(" -V -C $(ARDUINO_DIR)/hardware/tools/avr/etc/avrdude.conf -p${MCU} -c${PROTOCOL} -P${UPLOAD_PORT} -b${UPLOAD_BAUDRATE} -Uflash:w:${TARGET_OUTPUT_DIR}${TARGET_OUTPUT_BASENAME}.elf.hex:i"));
 
-						AddCoreSourceCode(project, targetName);
-						
+                if (needToSwitchBootloader) { // exit leonardo bootloader mode by restoring the serial port baudrate
+                    target.AddCommandsAfterBuild(_T("python ~/.codeblocks/end_leonardo_bootmode.py ${UPLOAD_PORT} ${UPLOAD_BAUDRATE}"));
+                }
+            }
+
+            if (variant.Matches(_T("leonardo")) || variant.Matches(_T("micro"))) {
+                if (variant.Matches(_T("leonardo"))) {
+                    target.SetVar(_T("USB_PID"), _T("0x8036"), false);
+                    target.SetVar(_T("USB_VID"), _T("0x2341"), false);
+                }
+                if (variant.Matches(_T("micro"))) {
+                    target.SetVar(_T("USB_PID"), _T("0x8037"), false);
+                    target.SetVar(_T("USB_VID"), _T("0x2341"), false);
+                }
+                target.AddCompilerOption(_T("-DUSB_PID=$(USB_PID)"));
+                target.AddCompilerOption(_T("-DUSB_VID=$(USB_VID)"));
+            }
+
+            AddCoreSourceCode(project, targetName);
+
         }
         
 
@@ -454,13 +465,14 @@ function SetupProject(project)
 	CreateTarget(project, _T("Tiny84 @ 16MHz"),             _T("attiny84"),   _T("tiny14"),             _T(""),        _T("19200"),  _T("16000000L"),  _T("8192"),   _T("512"));
 	CreateTarget(project, _T("Tiny84 @ 8MHz"),              _T("attiny84"),   _T("tiny14"),             _T(""),        _T("19200"),  _T("8000000L"),   _T("8192"),   _T("512"));
 	CreateTarget(project, _T("Tiny84 @ 1MHz"),              _T("attiny84"),   _T("tiny14"),             _T(""),        _T("19200"),  _T("1000000L"),   _T("8192"),   _T("512"));
-	CreateTarget(project, _T("Tiny85 @ 16MHz"),             _T("attiny85"),   _T("tiny8"),             _T(""),        _T("19200"),  _T("16000000L"),  _T("8192"),   _T("512"));
-	CreateTarget(project, _T("Tiny85 @ 8MHz"),              _T("attiny85"),   _T("tiny8"),             _T(""),        _T("19200"),  _T("8000000L"),   _T("8192"),   _T("512"));
-	CreateTarget(project, _T("Tiny85 @ 1MHz"),              _T("attiny85"),   _T("tiny8"),             _T(""),        _T("19200"),  _T("1000000L"),   _T("8192"),   _T("512"));
+	CreateTarget(project, _T("Tiny85 @ 16MHz"),             _T("attiny85"),   _T("tiny8"),              _T(""),        _T("19200"),  _T("16000000L"),  _T("8192"),   _T("512"));
+	CreateTarget(project, _T("Tiny85 @ 8MHz"),              _T("attiny85"),   _T("tiny8"),              _T(""),        _T("19200"),  _T("8000000L"),   _T("8192"),   _T("512"));
+	CreateTarget(project, _T("Tiny85 @ 1MHz"),              _T("attiny85"),   _T("tiny8"),              _T(""),        _T("19200"),  _T("1000000L"),   _T("8192"),   _T("512"));
 	CreateTarget(project, _T("ATmega328p @ 8MHz"),          _T("atmega328p"), _T("standard"),           _T(""),        _T("19200"),  _T("8000000L"),   _T("32768"),  _T("2048"));
 	CreateTarget(project, _T("ATmega328p @ 16MHz"),         _T("atmega328p"), _T("standard"),           _T(""),        _T("19200"),  _T("16000000L"),  _T("32768"),  _T("2048"));
 
 	CreateTarget(project, _T("Arduino Leonardo"),           _T("atmega32u4"), _T("leonardo"),           _T("avr109"),  _T("57600"),   _T("16000000L"), _T("28672"),  _T("2560"));
+	CreateTarget(project, _T("Arduino Micro"),              _T("atmega32u4"), _T("micro"),              _T("avr109"),  _T("57600"),   _T("16000000L"), _T("28672"),  _T("2560"));
 	
 	CreateTarget(project, _T("Arduino Uno"),                _T("atmega328p"), _T("standard"),           _T("arduino"), _T("115200"),  _T("16000000L"), _T("32256"),  _T("2048"));
 	CreateTarget(project, _T("Arduino Duemilanove (328)"),  _T("atmega328p"), _T("standard"),           _T("arduino"), _T("57600"),   _T("16000000L"), _T("30720"),  _T("2048"));
