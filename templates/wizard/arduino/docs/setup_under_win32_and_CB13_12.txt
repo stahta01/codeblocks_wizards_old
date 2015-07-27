@@ -1,0 +1,6 @@
+mkdir %APPDATA%\CodeBlocks\share\codeblocks\templates\wizard
+
+Copy templates\wizard\arduino folder to above location
+
+Add to file 
+RegisterWizard(wizProject,     _T("arduino"),      _T("Arduino Project"),       _T("Embedded Systems"));
