@@ -370,8 +370,8 @@ function CreateTarget(project, targetName, processor, variant, protocol, baudrat
                     target.AddCommandsAfterBuild(_T("${PYTHON_PATH}python \"" + HelpersDir + "/start_leonardo_bootmode.py\" ${UPLOAD_PORT}"));
                 }
                 // for ATtiny chips, we need to erase the flash memory in order to upload; all others can use the -D option - not sure why
-                local cmd = (variant.Matches(_T("tinyX4")) || variant.Matches(_T("tinyX5")))? _T("avrdude ") : _T("avrdude -D ");
-                target.AddCommandsAfterBuild(cmd + _T(" -V -C $(ARDUINO_DIR)/hardware/tools/avr/etc/avrdude.conf -p${MCU} -c${PROTOCOL} -P${UPLOAD_PORT} -b${UPLOAD_BAUDRATE} -Uflash:w:${TARGET_OUTPUT_DIR}${TARGET_OUTPUT_BASENAME}.elf.hex:i"));
+                local cmd = (variant.Matches(_T("tinyX4")) || variant.Matches(_T("tinyX5")))? _T("avrdude-bin ") : _T("avrdude-bin -D ");
+                target.AddCommandsAfterBuild(cmd + _T(" -V -C \"$(ARDUINO_DIR)/hardware/tools/avr/etc/avrdude.conf\" -p${MCU} -c${PROTOCOL} -P${UPLOAD_PORT} -b${UPLOAD_BAUDRATE} -Uflash:w:${TARGET_OUTPUT_DIR}${TARGET_OUTPUT_BASENAME}.elf.hex:i"));
 
                 if (needToSwitchBootloader) { // exit leonardo bootloader mode by restoring the serial port baudrate
                     target.AddCommandsAfterBuild(_T("${PYTHON_PATH}python \"" + HelpersDir + "/end_leonardo_bootmode.py\" ${UPLOAD_PORT} ${UPLOAD_BAUDRATE}"));
