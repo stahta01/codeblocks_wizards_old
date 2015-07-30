@@ -1,0 +1,3 @@
+[submodule "wizard/arduino_obfuscated"]
+	path = wizard/arduino_obfuscated
+	url = https://github.com/obfuscated/cb_arduino_template
