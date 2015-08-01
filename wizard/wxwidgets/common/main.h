@@ -10,9 +10,6 @@
 #ifndef [PROJECT_HDR]MAIN_H
 #define [PROJECT_HDR]MAIN_H
 
-[IF NONE]#ifndef WX_PRECOMP
-    #include <wx/wx.h>
-#endif[ENDIF NONE]
 
 #include "[FILENAME_PREFIX]App.h"
 
